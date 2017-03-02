@@ -97,5 +97,5 @@ def train_svc(cars, notcars):
 
 
 
-cars, notcars = load_images()
-train_svc(cars, notcars)
+#cars, notcars = load_images()
+#train_svc(cars, notcars)

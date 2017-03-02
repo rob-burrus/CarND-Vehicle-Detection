@@ -19,8 +19,8 @@ def visualize(fig, rows, cols, imgs, titles):
         img_dims = len(img.shape)
         if img_dims < 3:
             plt.imshow(img, cmap='hot')
-            plt.title(titles[i])
+            #plt.title(titles[i])
         else:
             plt.imshow(img)
-            plt.title(titles[i])
+            #plt.title(titles[i])
     plt.show()
