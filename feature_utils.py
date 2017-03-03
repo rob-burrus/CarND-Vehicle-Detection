@@ -41,23 +41,7 @@ def color_hist(img, nbins=32):#, bins_range=(0, 256)):
     channel3_hist = np.histogram(img[:,:,2], bins=nbins)#, range=bins_range)
     # Concatenate the histograms into a single feature vector
     hist_features = np.concatenate((channel1_hist[0], channel2_hist[0], channel3_hist[0]))
-    # Return the individual histograms, bin_centers and feature vector
-    #bin_edges = channel1_hist[1]
-    #bin_centers = (bin_edges[1:]  + bin_edges[0:len(bin_edges)-1])/2
-    #fig = plt.figure(figsize=(12,3))
-    #plt.subplot(131)
-    #plt.bar(bin_centers, channel1_hist[0])
-    #plt.xlim(0, 256)
-    #plt.title('Y Histogram')
-    #plt.subplot(132)
-    #plt.bar(bin_centers, channel2_hist[0])
-    #plt.xlim(0, 256)
-    #plt.title('Cr Histogram')
-    #plt.subplot(133)
-    #plt.bar(bin_centers, channel3_hist[0])
-    #plt.xlim(0, 256)
-    #plt.title('Cb Histogram')
-    #plt.show()
+
     return hist_features
 
 # Define a function to extract features from a list of images
@@ -173,14 +157,6 @@ def single_img_features(img, color_space='RGB', spatial_size=(32, 32),
                                     vis=False, feature_vec=True))
             hog_features = np.concatenate(hog_features)
 
-            #hog_images = []
-            #for channel in range(feature_image.shape[2]):
-            #    hog_features, hog_image = get_hog_features(feature_image[:,:,channel],
-            #                        orient, pix_per_cell, cell_per_block,
-            #                        vis=True, feature_vec=True)
-            #    hog_features.append(hog_features)
-            #    hog_images.append(hog_image)
-            #hog_features = np.concatenate(hog_features)
         else:
             if vis == True:
                 hog_features, hog_image = get_hog_features(feature_image[:,:,hog_channel], orient,

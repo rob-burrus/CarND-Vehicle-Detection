@@ -142,19 +142,17 @@ def process_image(img, heatmap_history):
     heatmap, draw_img = find_cars(img, draw_img, heatmap, y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
 
     #combine with heatmaps from previous frames
-    averaged_heatmap = heatmap_history.averaged_heatmap(heatmap)
+    averaged_heatmap = heatmap_history.combined_heatmap(heatmap)
     averaged_heatmap = apply_threshold(averaged_heatmap, 6)
     labels = label(averaged_heatmap)
-
-
     draw_labeled = draw_labeled_bboxes(np.copy(img), labels)
 
+
+    # Overlays draw_img onto draw_labeled to create our final output image 
     x_offset = 50
     y_offset = 350
     l_img = draw_labeled
-    #print(averaged_heatmap.shape)
     s_img = cv2.resize(draw_img, None, fx=.2, fy=.2)
-
     l_img[y_offset:y_offset+s_img.shape[0], x_offset:x_offset+s_img.shape[1], 0] = s_img[:,:,0]
     l_img[y_offset:y_offset+s_img.shape[0], x_offset:x_offset+s_img.shape[1], 1] = s_img[:,:,1]
     l_img[y_offset:y_offset+s_img.shape[0], x_offset:x_offset+s_img.shape[1], 2] = s_img[:,:,2]

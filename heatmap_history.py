@@ -7,7 +7,7 @@ class heatmap_history():
         # was the line detected in the last iteration?
         self.heatmaps = []
 
-    def averaged_heatmap(self, heatmap):
+    def combined_heatmap(self, heatmap):
         self.heatmaps.append(heatmap)
         heatmap_count = len(self.heatmaps)
         heatmaps = []
