@@ -5,10 +5,11 @@ import matplotlib.pyplot as plt
 import time
 import numpy as np
 import pickle
+import cv2
 from window_utils import search_windows, slide_window, draw_boxes, find_cars, draw_labeled_bboxes, apply_threshold
 from feature_utils import single_img_features
-from train_svc import load_images
-from utils import visualize
+from train_svc import load_images, train_svc
+from utils import visualize, plot3d
 from scipy.ndimage.measurements import label
 from moviepy.editor import VideoFileClip
 from IPython.display import HTML
@@ -21,9 +22,10 @@ def single_image_test(cars, notcars, y_start_stop, color_space, pix_per_cell, ce
     notcar_ind = np.random.randint(0, len(notcars))
 
     #Read in car / not car images
-    car_image = mpimg.imread(cars[car_ind])
-    notcar_image = mpimg.imread(notcars[notcar_ind])
-
+    car_image = mpimg.imread(cars[190])
+    notcar_image = mpimg.imread(notcars[190])
+    #cargray = cv2.cvtColor(car_image, cv2.COLOR_BGR2GRAY)
+    #notcargray = cv2.cvtColor(notcar_image, cv2.COLOR_BGR2GRAY)
     car_features, car_hog_image = single_img_features(car_image, color_space=color_space,
                             spatial_size=spatial_size, hist_bins=hist_bins,
                             orient=orient, pix_per_cell=pix_per_cell,
@@ -37,10 +39,15 @@ def single_image_test(cars, notcars, y_start_stop, color_space, pix_per_cell, ce
                             hog_channel=hog_channel, spatial_feat=spatial_feat,
                             hist_feat=hist_feat, hog_feat=hog_feat, vis=True)
 
+
+
     images = [car_image, car_hog_image, notcar_image, notcar_hog_image]
+    #images = [car_image, car_feature, notcar_image, notcar_feature]
     titles = ['car image', 'car HOG image', 'notcar image', 'notcar HOG image']
     fig = plt.figure(figsize=(12,3))
     visualize(fig, 1, 4, images, titles)
+
+
 
 
 def video_images_test(y_start_stop, overlap, scale, color_space, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, spatial_feat, hist_feat, hog_feat):
@@ -72,7 +79,7 @@ def video_images_test(y_start_stop, overlap, scale, color_space, svc, X_scaler, 
     fig = plt.figure(figsize=(12,2))
     visualize(fig, 1, 6, images, titles)
 
-def video_images_test_single_hog(heatmap_history, start, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins):
+def video_images_test_single_hog(start, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins):
     searchpath = 'test_images/*'
     example_images = glob.glob(searchpath)
 
@@ -84,30 +91,29 @@ def video_images_test_single_hog(heatmap_history, start, ystop, scale, svc, X_sc
     for img_src in example_images:
         img = mpimg.imread(img_src)
         heatmap = np.zeros_like(img[:,:,0])
-
+        draw_img = np.copy(img)
         scale = 1
         y_start_stop = [400, 528]
-        heatmap = find_cars(img, heatmap, y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
+        heatmap, draw_img = find_cars(img, draw_img, heatmap, y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
         scale = 1.5
         y_start_stop = [400, 656]
-        heatmap = find_cars(img, heatmap, y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
+        heatmap, draw_img = find_cars(img, draw_img, heatmap, y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
         scale = 2
         y_start_stop = [400, 656]
-        heatmap = find_cars(img, heatmap, y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
+        heatmap, draw_img = find_cars(img, draw_img, heatmap, y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
 
         #avergaed_heatmap = heatmap_history.averaged_heatmap(heatmap)
+        #avergaed_heatmap = apply_threshold(heatmap, 2)
 
-        avergaed_heatmap = apply_threshold(heatmap, 2)
-
-        labels = label(avergaed_heatmap)
-        draw_img = draw_labeled_bboxes(np.copy(img), labels)
-        out_images.append(draw_img)
+        labels = label(heatmap)
+        labeled_img = draw_labeled_bboxes(np.copy(img), labels)
+        #out_images.append(heatmap)
         out_images.append(labels[0])
         #fig = plt.figure(figsize=(24,2))
         #visualize(fig, 2, 6, out_images, out_titles)
 
-    fig = plt.figure(figsize=(24,2))
-    visualize(fig, 2, 6, out_images, out_titles)
+    #fig = plt.figure(figsize=(4,2))
+    visualize(2, 2, out_images, out_titles)
 
 def process_image(img, heatmap_history):
     color_space = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
@@ -115,8 +121,8 @@ def process_image(img, heatmap_history):
     pix_per_cell = 8 # HOG pixels per cell
     cell_per_block = 2 # HOG cells per block
     hog_channel = 'ALL' # Can be 0, 1, 2, or "ALL"
-    spatial_size = (16, 16) # Spatial binning dimensions
-    hist_bins = 16    # Number of histogram bins
+    spatial_size = (32, 32) # Spatial binning dimensions
+    hist_bins = 32    # Number of histogram bins
     spatial_feat = True # Spatial features on or off
     hist_feat = True # Histogram features on or off
     hog_feat = True # HOG features on or off
@@ -124,16 +130,16 @@ def process_image(img, heatmap_history):
     svc = dist_pickle["svc"]
     X_scaler = dist_pickle["X_scaler"]
     heatmap = np.zeros_like(img[:,:,0])
-
+    draw_img = np.copy(img)
     scale = 1
     y_start_stop = [400, 528]
-    heatmap = find_cars(img, heatmap, y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
+    heatmap, draw_img = find_cars(img, draw_img, heatmap, y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
     scale = 1.5
     y_start_stop = [400, 656]
-    heatmap = find_cars(img, heatmap, y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
+    heatmap, draw_img = find_cars(img, draw_img, heatmap, y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
     scale = 2
     y_start_stop = [400, 656]
-    heatmap = find_cars(img, heatmap, y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
+    heatmap, draw_img = find_cars(img, draw_img, heatmap, y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
 
     #combine with heatmaps from previous frames
     averaged_heatmap = heatmap_history.averaged_heatmap(heatmap)
@@ -141,15 +147,19 @@ def process_image(img, heatmap_history):
     labels = label(averaged_heatmap)
 
 
-    #heatmap_thresholded = apply_threshold(heatmap, 2)
-    #labels = label(heatmap)
-    #label_heatmap = labels_history.averaged_labels(labels[0])
-    #threshold_label_heatmap = apply_threshold(label_heatmap, 3)
-    #labels = label(label_heatmap)
+    draw_labeled = draw_labeled_bboxes(np.copy(img), labels)
 
+    x_offset = 50
+    y_offset = 350
+    l_img = draw_labeled
+    #print(averaged_heatmap.shape)
+    s_img = cv2.resize(draw_img, None, fx=.2, fy=.2)
 
-    draw_img = draw_labeled_bboxes(np.copy(img), labels)
-    return draw_img
+    l_img[y_offset:y_offset+s_img.shape[0], x_offset:x_offset+s_img.shape[1], 0] = s_img[:,:,0]
+    l_img[y_offset:y_offset+s_img.shape[0], x_offset:x_offset+s_img.shape[1], 1] = s_img[:,:,1]
+    l_img[y_offset:y_offset+s_img.shape[0], x_offset:x_offset+s_img.shape[1], 2] = s_img[:,:,2]
+
+    return l_img
 
 def process(img):
     processed = process_image(img, heatmap_history)
@@ -157,13 +167,28 @@ def process(img):
 
 def process_video():
     #test_output = 'test_ouput.mp4'
-    test_output = 'project_ouput2.mp4'
-#    clip = VideoFileClip('test_video.mp4')
-    clip = VideoFileClip('project_video.mp4')
+    test_output = 'adv_lane_ouput.mp4'
+    #clip = VideoFileClip('test_video.mp4')
+    clip = VideoFileClip('adv_lane_video.mp4')
     test_clip = clip.fl_image(process)
     test_clip.write_videofile(test_output, audio=False)
 
+def PlotColorSpaces(cars, notcars):
+    #choose random car / not car indices
+    car_ind = np.random.randint(0, len(cars))
+    notcar_ind = np.random.randint(0, len(notcars))
 
+    #Read in car / not car images
+    car_image = cv2.imread(cars[190])
+    notcar_image = cv2.imread(notcars[190])
+    img_small_RGB = cv2.cvtColor(car_image, cv2.COLOR_BGR2RGB)
+    img_small_YCrCb = cv2.cvtColor(car_image, cv2.COLOR_BGR2YCrCb)
+    img_small_rgb = img_small_RGB / 255.
+    plot3d(img_small_RGB, img_small_rgb)
+    plt.show()
+
+    plot3d(img_small_YCrCb, img_small_rgb, axis_labels=list("YCrCb"))
+    plt.show()
 
 
 color_space = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
@@ -171,8 +196,8 @@ orient = 9  # HOG orientations
 pix_per_cell = 8 # HOG pixels per cell
 cell_per_block = 2 # HOG cells per block
 hog_channel = 'ALL' # Can be 0, 1, 2, or "ALL"
-spatial_size = (16, 16) # Spatial binning dimensions
-hist_bins = 16    # Number of histogram bins
+spatial_size = (32, 32) # Spatial binning dimensions
+hist_bins = 32    # Number of histogram bins
 spatial_feat = True # Spatial features on or off
 hist_feat = True # Histogram features on or off
 hog_feat = True # HOG features on or off
@@ -183,10 +208,15 @@ y_start_stop = [400, 656]
 scale = 1.5
 overlap = .5
 heatmap_history = heatmap_history()
-labels_history = labels_history()
-#cars, notcars = train_svc()
+#labels_history = labels_history()
+
+
+#cars, notcars = load_images()
+#PlotColorSpaces(cars, notcars)
+#print(color_space)
+#train_svc(cars, notcars, color_space, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, hog_channel, spatial_feat, hist_feat, hog_feat)
 #single_image_test(cars, notcars, y_start_stop, color_space, pix_per_cell, cell_per_block, spatial_size, hist_bins, spatial_feat, hist_feat, hog_feat)
 #video_images_test(y_start_stop, overlap, scale, color_space, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins, spatial_feat, hist_feat, hog_feat)
-#video_images_test_single_hog(heatmap_history, y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
+#video_images_test_single_hog(y_start_stop[0], y_start_stop[1], scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
 
 process_video()

@@ -120,9 +120,9 @@ def draw_labeled_bboxes(img, labels):
     return img
 
 
-def find_cars(img, heatmap, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins):
+def find_cars(img, draw_img, heatmap, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins):
 
-    draw_img = np.copy(img)
+    #draw_img = np.copy(img)
     #heatmap = np.zeros_like(img[:,:,0])
     img = img.astype(np.float32)/255
     xstart = 400
@@ -185,4 +185,4 @@ def find_cars(img, heatmap, ystart, ystop, scale, svc, X_scaler, orient, pix_per
                 #img_boxes.append(((xbox_left, ytop_draw+ystart), (xbox_left+win_draw, ytop_draw+win_draw+ystart)))
                 heatmap[ytop_draw+ystart:ytop_draw+win_draw+ystart, xbox_left+xstart:xbox_left+xstart+win_draw] += 1
 
-    return heatmap
+    return heatmap, draw_img
