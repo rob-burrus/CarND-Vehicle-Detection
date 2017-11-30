@@ -14,7 +14,7 @@ The pipeline has the follow steps:
     * Stack spatial binned, color, and HOG features together and use the SVM classifier to make a prediction. If the prediction is positive, use the current window positoin and size to draw a rectangle on the original image, and add "heat" to the heatmap
   * After the sliding window technique has been applied at all 3 window sizes, combine the heatmap for the current image with the heatmaps from the previous 8 frames. Then apply a heatmap threshold to combined heatmap, and draw bounding boxes around each vehicle 
 
-Orignial 
+Example training image 
 
 ![original](./output_images/original.png) 
 
@@ -22,7 +22,7 @@ Spatial Binning
 
 ![spatial binning](./output_images/spatial_binning.png)
 
-Color Histogram using YCrCb color space. 
+Color Histogram using Y channel from YCrCb color space. 
 
 ![color hist](./output_images/color_hist.png)
 
@@ -34,13 +34,11 @@ Results of sliding window search. Many duplicates for each car creates more "hea
 
 ![window1](./output_images/window1.png)  ![heat1](./output_images/heat1.png) 
 
-![window2](./output_images/window2.png) ![heat2](./output_images/heat2.png)
-
 Labels are applied to the heatmap and final bounding boxes are drawn
 
 ![label1](./output_images/label1.png)  ![final1](./output_images/final1.png) 
 
-![label2](./output_images/label2.png)  ![final2](./output_images/final2.png)
+
 
 
 
