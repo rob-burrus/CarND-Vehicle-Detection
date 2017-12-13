@@ -1,0 +1,8 @@
+#Autosave files
+*~
+
+#Images data
+vehicles/
+non-vehicles/
+video_images/
+
