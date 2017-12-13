@@ -12,6 +12,7 @@ Example training image
 ![original](./output_images/original.png) 
 
 ### 1. Spatial Binning
+Use OpenCV function resize() to resize the image to 32x32px, and ravel() to transform into a 1-dimensional feature vector
 
 ![spatial binning](./output_images/spatial_binning.png)
 
@@ -21,6 +22,7 @@ Y channel from YCrCb color space
 ![color hist](./output_images/color_hist.png)
 
 ### 3. Histogram of Oriented Gradients (HOG)
+Use OpenCV to compute HOG signature for each image. This consists in computing gradient magnitudes and directions for each pixel, then summing magnitudes for 8x8 cells. The result is a HOG signature for a car that can used to train a classifier. 
 
 ![hog](./output_images/hog.png)
 
@@ -51,6 +53,22 @@ Labels are applied to the heatmap and final bounding boxes are drawn
 ![label1](./output_images/label1.png)  ![final1](./output_images/final1.png) 
 
 
+
+## Dependencies
+
+* Python 3
+* OpenCV
+* Numpy
+* matplotlib
+* Jupyter Notebook
+
+Note: Udacity has a handy Anaconda environment that includes many of the dependencies used in the Self-Driving Car Nanodegree: [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md)
+
+## Running the code 
+The project is completed in a Jupyter notebook. 
+To start Jupyter in your browser, run the following command at the terminal prompt and within your Python 3 environment:
+
+`> jupyter notebook`
 
 
 
