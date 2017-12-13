@@ -1,5 +1,7 @@
 # Vehicle Detection and Tracking
 
+<a href="https://imgflip.com/gif/20zas2"><img src="https://i.imgflip.com/20zas2.gif" title="made at imgflip.com"/></a>
+
 ## Overview
 Software pipeline using traditional CV techniques to detect and draw bounding-boxes around vehicles in a video from a front-facing camera on a car. First, train a linear Support Vector Machine classifier on extracted features to identify car vs not-car. Then, process each frame of video using a sliding window technique, the trained classifier, and vehicle detections from previous frames. 
 
@@ -52,7 +54,7 @@ Labels are applied to the heatmap and final bounding boxes are drawn
 
 ![label1](./output_images/label1.png)  ![final1](./output_images/final1.png) 
 
-
+![final1](./output_images/final.png) 
 
 ## Dependencies
 
